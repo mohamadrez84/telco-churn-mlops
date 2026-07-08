@@ -1,5 +1,4 @@
-# Customer Churn MLOps — نسخه تکمیل‌شده
-
+# Customer Churn MLOps
 ## نکات مهم پروژه
 
 |---|---|---|
