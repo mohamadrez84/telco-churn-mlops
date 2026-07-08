@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pyc
+mlflow.db
+mlruns/
+catboost_info/
+.ipynb_checkpoints/
