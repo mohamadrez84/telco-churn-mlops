@@ -1,0 +1,143 @@
+C:\Users\ASUS\OneDrive\Documents\Customer_Churn_MLOps_completed\Customer_Churn_MLOps\src\preprocessing.py:84: FutureWarning: Downcasting behavior in `replace` is deprecated and will be removed in a future version. To retain the old behavior, explicitly call `result.infer_objects(copy=False)`. To opt-in to the future behavior, set `pd.set_option('future.no_silent_downcasting', True)`
+  .replace({"Yes": 1, "No": 0, "1": 1, "0": 0}).astype(int)
+[preprocessing] 13 ستون حذف شد: ['CustomerID', 'Count', 'Country', 'State', 'City', 'Zip Code', 'Lat Long', 'Latitude', 'Longitude', 'Churn Label', 'Churn Score', 'Churn Reason', 'CLTV']
+[preprocessing] 11 مقدار گمشده در Total Charges با 0 پر شد (مشتریان با Tenure Months=0).
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 7043 entries, 0 to 7042
+Data columns (total 31 columns):
+ #   Column                                  Non-Null Count  Dtype  
+---  ------                                  --------------  -----  
+ 0   Gender                                  7043 non-null   int64  
+ 1   Senior Citizen                          7043 non-null   int64  
+ 2   Partner                                 7043 non-null   int64  
+ 3   Dependents                              7043 non-null   int64  
+ 4   Tenure Months                           7043 non-null   int64  
+ 5   Phone Service                           7043 non-null   int64  
+ 6   Paperless Billing                       7043 non-null   int64  
+ 7   Monthly Charges                         7043 non-null   float64
+ 8   Total Charges                           7043 non-null   float64
+ 9   Churn Value                             7043 non-null   int64  
+ 10  Multiple Lines_No phone service         7043 non-null   int64  
+ 11  Multiple Lines_Yes                      7043 non-null   int64  
+ 12  Internet Service_Fiber optic            7043 non-null   int64  
+ 13  Internet Service_No                     7043 non-null   int64  
+ 14  Online Security_No internet service     7043 non-null   int64  
+ 15  Online Security_Yes                     7043 non-null   int64  
+ 16  Online Backup_No internet service       7043 non-null   int64  
+ 17  Online Backup_Yes                       7043 non-null   int64  
+ 18  Device Protection_No internet service   7043 non-null   int64  
+ 19  Device Protection_Yes                   7043 non-null   int64  
+ 20  Tech Support_No internet service        7043 non-null   int64  
+ 21  Tech Support_Yes                        7043 non-null   int64  
+ 22  Streaming TV_No internet service        7043 non-null   int64  
+ 23  Streaming TV_Yes                        7043 non-null   int64  
+ 24  Streaming Movies_No internet service    7043 non-null   int64  
+ 25  Streaming Movies_Yes                    7043 non-null   int64  
+ 26  Contract_One year                       7043 non-null   int64  
+ 27  Contract_Two year                       7043 non-null   int64  
+ 28  Payment Method_Credit card (automatic)  7043 non-null   int64  
+ 29  Payment Method_Electronic check         7043 non-null   int64  
+ 30  Payment Method_Mailed check             7043 non-null   int64  
+dtypes: float64(2), int64(29)
+memory usage: 1.7 MB
+None
+(7043, 31)
+
+Saved -> C:\Users\ASUS\OneDrive\Documents\Customer_Churn_MLOps_completed\Customer_Churn_MLOps\data\v2\clean_data.csv
+============================================================
+Feature Engineering Finished
+============================================================
+<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 7043 entries, 0 to 7042
+Data columns (total 35 columns):
+ #   Column                                  Non-Null Count  Dtype  
+---  ------                                  --------------  -----  
+ 0   Gender                                  7043 non-null   int64  
+ 1   Senior Citizen                          7043 non-null   int64  
+ 2   Partner                                 7043 non-null   int64  
+ 3   Dependents                              7043 non-null   int64  
+ 4   Tenure Months                           7043 non-null   int64  
+ 5   Phone Service                           7043 non-null   int64  
+ 6   Paperless Billing                       7043 non-null   int64  
+ 7   Monthly Charges                         7043 non-null   float64
+ 8   Total Charges                           7043 non-null   float64
+ 9   Churn Value                             7043 non-null   int64  
+ 10  Multiple Lines_No phone service         7043 non-null   int64  
+ 11  Multiple Lines_Yes                      7043 non-null   int64  
+ 12  Internet Service_Fiber optic            7043 non-null   int64  
+ 13  Internet Service_No                     7043 non-null   int64  
+ 14  Online Security_No internet service     7043 non-null   int64  
+ 15  Online Security_Yes                     7043 non-null   int64  
+ 16  Online Backup_No internet service       7043 non-null   int64  
+ 17  Online Backup_Yes                       7043 non-null   int64  
+ 18  Device Protection_No internet service   7043 non-null   int64  
+ 19  Device Protection_Yes                   7043 non-null   int64  
+ 20  Tech Support_No internet service        7043 non-null   int64  
+ 21  Tech Support_Yes                        7043 non-null   int64  
+ 22  Streaming TV_No internet service        7043 non-null   int64  
+ 23  Streaming TV_Yes                        7043 non-null   int64  
+ 24  Streaming Movies_No internet service    7043 non-null   int64  
+ 25  Streaming Movies_Yes                    7043 non-null   int64  
+ 26  Contract_One year                       7043 non-null   int64  
+ 27  Contract_Two year                       7043 non-null   int64  
+ 28  Payment Method_Credit card (automatic)  7043 non-null   int64  
+ 29  Payment Method_Electronic check         7043 non-null   int64  
+ 30  Payment Method_Mailed check             7043 non-null   int64  
+ 31  AvgChargePerMonth                       7043 non-null   float64
+ 32  TenureGroup                             7043 non-null   int64  
+ 33  HighValueCustomer                       7043 non-null   int64  
+ 34  LongContract                            7043 non-null   int64  
+dtypes: float64(3), int64(32)
+memory usage: 1.9 MB
+None
+(7043, 35)
+
+Saved to C:\Users\ASUS\OneDrive\Documents\Customer_Churn_MLOps_completed\Customer_Churn_MLOps\data\v3\feature_data.csv
+
+======================================================================
+ نسخه دیتاست: v2 | شکل: (7043, 31)
+======================================================================
+[train] train: (4929, 30), val: (1057, 30), test: (1057, 30)
+[train] LogisticRegression | CV F1 (5-fold): mean=0.6432 ± 0.0063
+[train] LogisticRegression | Validation F1: 0.6202
+[train] RandomForest | CV F1 (5-fold): mean=0.6144 ± 0.0140
+[train] RandomForest | Validation F1: 0.6277
+[train] XGBoost | CV F1 (5-fold): mean=0.5906 ± 0.0227
+[train] XGBoost | Validation F1: 0.5771
+[train] CatBoost | CV F1 (5-fold): mean=0.6353 ± 0.0121
+[train] CatBoost | Validation F1: 0.6161
+[mlflow_utils] Run ثبت شد -> LogisticRegression_v2 (run_id=f81fb7d0dbd343b394c42a4bbf0f2239)
+[mlflow_utils] Run ثبت شد -> RandomForest_v2 (run_id=2a6931fd2d0c49488f51cb9ed8218f7d)
+[mlflow_utils] Run ثبت شد -> XGBoost_v2 (run_id=a9457267191542b088ddd7a882d5e761)
+[mlflow_utils] Run ثبت شد -> CatBoost_v2 (run_id=11f38e923393401b90ce75a5c25dfcb5)
+[train] بهترین مدل بر اساس Validation: RandomForest (0.6277)
+
+======================================================================
+ نسخه دیتاست: v3 | شکل: (7043, 35)
+======================================================================
+[train] train: (4929, 34), val: (1057, 34), test: (1057, 34)
+[train] LogisticRegression | CV F1 (5-fold): mean=0.6472 ± 0.0107
+[train] LogisticRegression | Validation F1: 0.6311
+[train] RandomForest | CV F1 (5-fold): mean=0.6197 ± 0.0068
+[train] RandomForest | Validation F1: 0.6232
+[train] XGBoost | CV F1 (5-fold): mean=0.6073 ± 0.0094
+[train] XGBoost | Validation F1: 0.6096
+[train] CatBoost | CV F1 (5-fold): mean=0.6366 ± 0.0106
+[train] CatBoost | Validation F1: 0.6349
+[mlflow_utils] Run ثبت شد -> LogisticRegression_v3 (run_id=67ffc1fa90ce4910a922e910756c4bdd)
+[mlflow_utils] Run ثبت شد -> RandomForest_v3 (run_id=d82540c32f5441efa65e1829eab3946c)
+[mlflow_utils] Run ثبت شد -> XGBoost_v3 (run_id=4f30b0c338b64f5599bedc3336e903de)
+[mlflow_utils] Run ثبت شد -> CatBoost_v3 (run_id=90c3e95410ad4f59bc00aeb8ad114dd0)
+[train] بهترین مدل بر اساس Validation: CatBoost (0.6349)
+
+dataset_version              model  cv_f1_mean   val_f1  test_accuracy  test_precision  test_recall  test_f1_score  test_roc_auc
+             v3           CatBoost    0.636650 0.634873       0.769158        0.543902     0.796429       0.646377      0.855886
+             v3 LogisticRegression    0.647199 0.631124       0.753075        0.522042     0.803571       0.632911      0.860317
+             v2 LogisticRegression    0.643170 0.620199       0.750237        0.518433     0.803571       0.630252      0.857513
+             v2       RandomForest    0.614433 0.627713       0.782403        0.574850     0.685714       0.625407      0.840010
+             v3       RandomForest    0.619701 0.623165       0.776727        0.563584     0.696429       0.623003      0.841662
+             v2           CatBoost    0.635306 0.616071       0.752129        0.522500     0.746429       0.614706      0.850908
+             v3            XGBoost    0.607283 0.609589       0.772942        0.562500     0.642857       0.600000      0.830679
+             v2            XGBoost    0.590594 0.577114       0.759697        0.539394     0.635714       0.583607      0.821865
+
+✅ بهترین مدل: CatBoost روی v3 -> models/best_model.pkl
