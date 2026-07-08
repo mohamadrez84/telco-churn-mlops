@@ -1,0 +1,5 @@
+{
+  "dataset_version": "v3",
+  "model_name": "CatBoost",
+  "test_f1_score": 0.6463768115942029
+}
