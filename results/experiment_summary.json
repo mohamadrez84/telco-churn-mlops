@@ -1,0 +1,266 @@
+{
+  "seed": 42,
+  "source_data_sha256": "1bcbc0ccc9b352175216979102628e579cfbde2c3ff57b005de168a433122640",
+  "selection_metric": "val_f1",
+  "experiments": [
+    {
+      "dataset_version": "v2",
+      "model": "LogisticRegression",
+      "selected": false,
+      "params": {
+        "C": "1.0",
+        "class_weight": "balanced",
+        "dual": "False",
+        "fit_intercept": "True",
+        "intercept_scaling": "1",
+        "l1_ratio": "0.0",
+        "max_iter": "2000",
+        "n_jobs": "None",
+        "penalty": "deprecated",
+        "random_state": "42",
+        "solver": "lbfgs",
+        "tol": "0.0001",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6439872588898587,
+        "cv_f1_std": 0.005966592850970921,
+        "val_f1": 0.620199146514936
+      }
+    },
+    {
+      "dataset_version": "v2",
+      "model": "RandomForest",
+      "selected": false,
+      "params": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "balanced",
+        "criterion": "gini",
+        "max_depth": "None",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "1",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "200",
+        "n_jobs": "4",
+        "oob_score": "False",
+        "random_state": "42",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6138721449338493,
+        "cv_f1_std": 0.013607393730388093,
+        "val_f1": 0.6277128547579299
+      }
+    },
+    {
+      "dataset_version": "v2",
+      "model": "XGBoost",
+      "selected": false,
+      "params": {
+        "base_score": "None",
+        "booster": "None",
+        "callbacks": "None",
+        "colsample_bylevel": "None",
+        "colsample_bynode": "None",
+        "colsample_bytree": "None",
+        "device": "None",
+        "early_stopping_rounds": "None",
+        "enable_categorical": "True",
+        "eval_metric": "logloss",
+        "feature_types": "None",
+        "feature_weights": "None",
+        "gamma": "None",
+        "grow_policy": "None",
+        "importance_type": "None",
+        "interaction_constraints": "None",
+        "learning_rate": "None",
+        "max_bin": "None",
+        "max_cat_threshold": "None",
+        "max_cat_to_onehot": "None",
+        "max_delta_step": "None",
+        "max_depth": "None",
+        "max_leaves": "None",
+        "min_child_weight": "None",
+        "missing": "nan",
+        "monotone_constraints": "None",
+        "multi_strategy": "None",
+        "n_estimators": "200",
+        "n_jobs": "4",
+        "num_parallel_tree": "None",
+        "objective": "binary:logistic",
+        "random_state": "42",
+        "reg_alpha": "None",
+        "reg_lambda": "None",
+        "sampling_method": "None",
+        "scale_pos_weight": "2.768348623853211",
+        "subsample": "None",
+        "tree_method": "None",
+        "validate_parameters": "None",
+        "verbosity": "None"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.594965520361964,
+        "cv_f1_std": 0.01966401842419407,
+        "val_f1": 0.5771144278606966
+      }
+    },
+    {
+      "dataset_version": "v2",
+      "model": "CatBoost",
+      "selected": false,
+      "params": {
+        "allow_writing_files": "False",
+        "auto_class_weights": "Balanced",
+        "iterations": "200",
+        "random_state": "42",
+        "thread_count": "4",
+        "verbose": "0"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6353061958679956,
+        "cv_f1_std": 0.01212986458198097,
+        "val_f1": 0.6160714285714286
+      }
+    },
+    {
+      "dataset_version": "v3",
+      "model": "LogisticRegression",
+      "selected": false,
+      "params": {
+        "C": "1.0",
+        "class_weight": "balanced",
+        "dual": "False",
+        "fit_intercept": "True",
+        "intercept_scaling": "1",
+        "l1_ratio": "0.0",
+        "max_iter": "2000",
+        "n_jobs": "None",
+        "penalty": "deprecated",
+        "random_state": "42",
+        "solver": "lbfgs",
+        "tol": "0.0001",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6458318757270436,
+        "cv_f1_std": 0.011060965826058736,
+        "val_f1": 0.6309696092619392
+      }
+    },
+    {
+      "dataset_version": "v3",
+      "model": "RandomForest",
+      "selected": false,
+      "params": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "balanced",
+        "criterion": "gini",
+        "max_depth": "None",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "1",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "200",
+        "n_jobs": "4",
+        "oob_score": "False",
+        "random_state": "42",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6233401491001704,
+        "cv_f1_std": 0.009964271832657901,
+        "val_f1": 0.631578947368421
+      }
+    },
+    {
+      "dataset_version": "v3",
+      "model": "XGBoost",
+      "selected": false,
+      "params": {
+        "base_score": "None",
+        "booster": "None",
+        "callbacks": "None",
+        "colsample_bylevel": "None",
+        "colsample_bynode": "None",
+        "colsample_bytree": "None",
+        "device": "None",
+        "early_stopping_rounds": "None",
+        "enable_categorical": "True",
+        "eval_metric": "logloss",
+        "feature_types": "None",
+        "feature_weights": "None",
+        "gamma": "None",
+        "grow_policy": "None",
+        "importance_type": "None",
+        "interaction_constraints": "None",
+        "learning_rate": "None",
+        "max_bin": "None",
+        "max_cat_threshold": "None",
+        "max_cat_to_onehot": "None",
+        "max_delta_step": "None",
+        "max_depth": "None",
+        "max_leaves": "None",
+        "min_child_weight": "None",
+        "missing": "nan",
+        "monotone_constraints": "None",
+        "multi_strategy": "None",
+        "n_estimators": "200",
+        "n_jobs": "4",
+        "num_parallel_tree": "None",
+        "objective": "binary:logistic",
+        "random_state": "42",
+        "reg_alpha": "None",
+        "reg_lambda": "None",
+        "sampling_method": "None",
+        "scale_pos_weight": "2.768348623853211",
+        "subsample": "None",
+        "tree_method": "None",
+        "validate_parameters": "None",
+        "verbosity": "None"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.598756848876698,
+        "cv_f1_std": 0.006379371561018601,
+        "val_f1": 0.5912162162162162
+      }
+    },
+    {
+      "dataset_version": "v3",
+      "model": "CatBoost",
+      "selected": true,
+      "params": {
+        "allow_writing_files": "False",
+        "auto_class_weights": "Balanced",
+        "iterations": "200",
+        "random_state": "42",
+        "thread_count": "4",
+        "verbose": "0"
+      },
+      "metrics": {
+        "cv_f1_mean": 0.6405956719381475,
+        "cv_f1_std": 0.008569392825355729,
+        "val_f1": 0.6435045317220544,
+        "test_accuracy": 0.7615894039735099,
+        "test_precision": 0.535175879396985,
+        "test_recall": 0.7607142857142857,
+        "test_f1_score": 0.6283185840707964,
+        "test_roc_auc": 0.8531370656370656
+      }
+    }
+  ]
+}

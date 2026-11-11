@@ -1,10 +1,4 @@
-pandas
-numpy
-scikit-learn
-xgboost
-catboost
-mlflow
-matplotlib
-joblib
-flask
-openpyxl
+-r requirements-serving.txt
+mlflow==3.14.0
+matplotlib==3.11.0
+openpyxl==3.1.5

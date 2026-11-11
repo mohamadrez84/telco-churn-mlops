@@ -1,0 +1,8 @@
+**
+!requirements-serving.txt
+!src/
+!src/*.py
+!deployment/
+!deployment/app.py
+!models/
+!models/best_model.pkl

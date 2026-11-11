@@ -1,12 +1,3 @@
-"""
-evaluate.py
------------
-فایل جدید — قبلاً محاسبه متریک‌ها داخل train.py قاطی بود؛ طبق ساختار
-خواسته‌شده در مستند پروژه، این باید یک ماژول مجزا باشد.
-
-مسئولیت: محاسبه معیارهای ارزیابی روی داده Test (فقط یک‌بار در پایان).
-"""
-
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score,
     f1_score, roc_auc_score, confusion_matrix,

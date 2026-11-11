@@ -1,5 +1,12 @@
 {
-  "dataset_version": "v3",
   "model_name": "CatBoost",
-  "test_f1_score": 0.6463768115942029
+  "dataset_version": "v3",
+  "cv_f1_mean": 0.6405956719381475,
+  "cv_f1_std": 0.008569392825355729,
+  "val_f1": 0.6435045317220544,
+  "test_accuracy": 0.7615894039735099,
+  "test_precision": 0.535175879396985,
+  "test_recall": 0.7607142857142857,
+  "test_f1_score": 0.6283185840707964,
+  "test_roc_auc": 0.8531370656370656
 }

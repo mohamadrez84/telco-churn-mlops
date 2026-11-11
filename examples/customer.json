@@ -1,0 +1,21 @@
+{
+  "Tenure Months": 12,
+  "Monthly Charges": 75,
+  "Total Charges": 900,
+  "Gender": "Female",
+  "Senior Citizen": "No",
+  "Partner": "No",
+  "Dependents": "No",
+  "Phone Service": "Yes",
+  "Paperless Billing": "Yes",
+  "Multiple Lines": "No",
+  "Internet Service": "Fiber optic",
+  "Online Security": "No",
+  "Online Backup": "No",
+  "Device Protection": "No",
+  "Tech Support": "No",
+  "Streaming TV": "No",
+  "Streaming Movies": "No",
+  "Contract": "Two year",
+  "Payment Method": "Electronic check"
+}

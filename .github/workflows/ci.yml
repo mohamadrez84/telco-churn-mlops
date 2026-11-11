@@ -1,0 +1,49 @@
+name: Tests and Docker smoke test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-serving.txt
+      - run: python -m pip install -r requirements.txt
+      - run: python -m unittest discover -s tests -v
+
+  docker:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build API image
+        run: docker build -t telco-churn-api:ci .
+      - name: Verify HTTP contract
+        run: |
+          docker run -d --name telco-ci -p 127.0.0.1:8000:8000 telco-churn-api:ci
+          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/health
+          curl --fail --silent --show-error -H 'Content-Type: application/json' \
+            --data-binary @examples/customer.json http://127.0.0.1:8000/predict \
+            | python3 -c 'import json,sys; result=json.load(sys.stdin); assert result["churn_prediction"] in (0,1) and 0 <= result["churn_probability"] <= 1'
+          status=$(curl --silent --show-error -o /dev/null -w '%{http_code}' \
+            -H 'Content-Type: application/json' --data '{}' http://127.0.0.1:8000/predict)
+          test "$status" = 400
+      - name: Show service logs on failure
+        if: failure()
+        run: docker logs telco-ci || true
+      - name: Remove smoke-test container
+        if: always()
+        run: docker rm -f telco-ci || true

@@ -1,58 +1,67 @@
-# Customer Churn MLOps
-## نکات مهم پروژه
+# Telco Customer Churn MLOps
 
-|---|---|---|
-| `src/data_loader.py` | مسیر مطلق ویندوزی → مسیر نسبی با `Path` | قابل حمل به هر سیستم/Docker |
+An end-to-end churn classification project using the IBM Telco Customer Churn sample. It compares four classifiers on two feature sets, tracks experiments in MLflow, and serves the selected model through a Flask API.
 
-| `src/preprocessing.py` | حذف `CLTV`, `Latitude`, `Longitude` | جلوگیری از Data Leakage |
+[Model report](docs/model-report.md) · [راهنمای فارسی](docs/README.fa.md)
 
-| `src/preprocessing.py` | پرکردن `Total Charges` با ۰ به‌جای median | منطق کسب‌وکاری درست‌تر (Tenure=0) |
+## Results
 
-| `src/features.py` | حذف فیچر `CustomerValueIndex` (وابسته به CLTV) | چون CLTV دیگر وجود ندارد |
+| Selected model | Validation F1 | Test F1 | Test precision | Test recall | Test ROC-AUC |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| CatBoost with engineered features | 0.6435 | 0.6283 | 0.5352 | 0.7607 | 0.8531 |
 
-| `src/train.py` | اضافه‌شدن split سه‌گانه Train/Val/Test | جلوگیری از انتخاب مدل با Test |
+The pipeline selects the model and feature set by validation F1. Only the selected model is scored on the internal test split. See the [candidate comparison](results/model_comparison.csv), [experiment snapshot](results/experiment_summary.json), and [confusion matrix](results/confusion_matrix.png). No independent cohort was available for external validation.
 
-| `src/train.py` | اضافه‌شدن `StandardScaler` (fit فقط روی Train) | جلوگیری از نشتی در نرمال‌سازی |
+## Run the API
 
-| `src/train.py` | مقایسه v2 **و** v3 (قبلاً فقط v3) | سنجش واقعی اثر Feature Engineering |
+From the repository root, using Python 3.13:
 
-| `src/evaluate.py` | فایل جدید | جدا کردن منطق ارزیابی از آموزش |
-
-| `src/mlflow_utils.py` | فایل جدید | ثبت کامل‌تر (Confusion Matrix + خود مدل) |
-
-| `run_pipeline.py` | فایل جدید | یک دستور برای اجرای کل فرآیند |
-
-| `Dockerfile` + `deployment/app.py` | فایل جدید | مرحله ۴ مستند پروژه (Deployment) |
-
-| `requirements.txt` | فایل جدید | تکرارپذیری نصب محیط |
-
-## نحوه اجرا
-
-```bash
-pip install -r requirements.txt
-python run_pipeline.py
+```sh
+python -m pip install -r requirements-serving.txt
+python -m deployment.app
 ```
 
-بعد از اجرا:
-- `data/v2/clean_data.csv` و `data/v3/feature_data.csv` بازتولید می‌شوند
-- `mlflow.db` با ۸ Run (۴ مدل × ۲ نسخه) پر می‌شود
-- `results/model_comparison.csv` جدول مقایسه کامل را نشان می‌دهد
-- `models/best_model.pkl` بهترین مدل (بر اساس F1 روی Test) را نگه می‌دارد
+Or build and run the container:
 
-### دیدن نتایج در MLflow UI
-```bash
-mlflow ui --backend-store-uri sqlite:///mlflow.db
-```
-
-### استقرار با Docker
-```bash
+```sh
 docker build -t telco-churn-api .
-docker run -p 8000:8000 telco-churn-api
-curl -X POST http://localhost:8000/predict -H "Content-Type: application/json" -d '{"Tenure Months": 12, ...}'
+docker run --rm -p 127.0.0.1:8000:8000 telco-churn-api
 ```
 
-## نکته مهم درباره نتیجه واقعی این اجرا
+```sh
+curl http://127.0.0.1:8000/health
+curl -H "Content-Type: application/json" --data-binary "@examples/customer.json" http://127.0.0.1:8000/predict
+```
 
-بعد از رفع نشتی‌ها، F1-score واقعی حدود **0.63-0.65** است (نه بیشتر) —
-این عدد واقعی است. اگر CLTV را نگه می‌داشتیم عدد بالاتری
-می‌گرفتیم اما آن عدد دروغ بود (مدل در عمل آن‌قدر خوب کار نمی‌کرد).
+Use `curl.exe` in Windows PowerShell. The example includes every raw field. The API returns a class, label, and probability. Missing or invalid inputs return HTTP 400.
+
+## Reproduce training
+
+```sh
+python -m pip install -r requirements.txt
+python -m unittest discover -s tests -v
+python -m run_pipeline
+mlflow ui --backend-store-uri sqlite:///tracking/mlflow.db
+```
+
+Each execution logs eight candidates and exports the latest metrics, parameters, dataset hash, and test confusion matrix under `results/`. The selected model bundle under `models/` includes the fitted scaler, feature order, and training-derived threshold. The [model report](docs/model-report.md#mlflow-on-another-machine) explains how to keep the complete run history and artifacts together.
+
+## Score an independent cohort
+
+```sh
+python -m evaluate_external path/to/independent-cohort.csv
+```
+
+Use the raw fields in the [API example](examples/customer.json) plus unique `CustomerID` values and observed binary `Churn Value` labels. CSV and XLSX are supported. The command rejects IDs overlapping the IBM sample and prints aggregate metrics for the existing model. Use a separately collected cohort, since an ID check alone cannot establish data independence.
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `data/v1`, `data/v2`, `data/v3` | Raw sample, encoded data, and engineered features |
+| `src/` and `run_pipeline.py` | Preprocessing, training, evaluation, and tracking |
+| `models/` and `results/` | Selected model and evaluation artifacts |
+| `deployment/` and `Dockerfile` | Flask API served by Waitress |
+| `tests/` and `.github/workflows/ci.yml` | Regression tests and container HTTP smoke test |
+
+Data source: [IBM Cognos Analytics Telco Customer Churn sample](https://community.ibm.com/community/user/blogs/steven-macko/2019/07/11/telco-customer-churn-1113?hlmlt=VT).

@@ -5,3 +5,9 @@ mlflow.db
 mlruns/
 catboost_info/
 .ipynb_checkpoints/
+
+tracking/
+mlartifacts/
+.venv/
+.env
+shared-tracking/

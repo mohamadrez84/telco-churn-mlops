@@ -1,101 +1,100 @@
-"""
-run_pipeline.py
-----------------
-فایل جدید — طبق مستند پروژه، باید یک فایل اصلی وجود داشته باشد که کل
-فرآیند (بارگذاری داده تا ثبت در MLflow) را به‌صورت خودکار اجرا کند.
-قبلاً هر مرحله را باید دستی (preprocessing.py، سپس features.py، سپس
-train.py) اجرا می‌کردید؛ حالا با یک دستور کل چرخه اجرا می‌شود:
-
-    python run_pipeline.py
-"""
-
-import os
+"""Train candidates, select on validation, and evaluate the winner on test."""
 import json
+from hashlib import file_digest
+from pathlib import Path
+
 import joblib
 import pandas as pd
 
+from src.data_loader import RAW_XLSX_PATH
 from src.preprocessing import preprocess
-from src.features import create_features
-from src.train import split_data, scale_numeric, train_all_models, get_best_model, SEED
+from src.features import create_features, transform_features
+from src.train import SEED, split_data, train_all_models
 from src.evaluate import evaluate_model
-from src.mlflow_utils import init_mlflow, log_run
+from src.mlflow_utils import init_mlflow, log_run, save_confusion_matrix
 
-RESULTS_DIR = "results"
-
-
-def run_for_version(df: pd.DataFrame, dataset_version: str, seed: int = SEED):
-    print(f"\n{'='*70}\n نسخه دیتاست: {dataset_version} | شکل: {df.shape}\n{'='*70}")
-
-    X_train, X_val, X_test, y_train, y_val, y_test = split_data(df, seed=seed)
-    X_train, X_val, X_test, scaler = scale_numeric(X_train, X_val, X_test)
-
-    results = train_all_models(X_train, y_train, X_val, y_val, seed=seed)
-
-    rows = []
-    for model_name, res in results.items():
-        model = res["model"]
-        eval_out = evaluate_model(model, X_test, y_test)
-        metrics, cm = eval_out["metrics"], eval_out["confusion_matrix"]
-
-        log_run(
-            model_name=model_name,
-            dataset_version=dataset_version,
-            params={k: v for k, v in res["params"].items() if isinstance(v, (int, float, str, bool)) or v is None},
-            metrics=metrics,
-            seed=seed,
-            confusion_matrix=cm,
-            model=model,
-        )
-
-        rows.append({
-            "dataset_version": dataset_version,
-            "model": model_name,
-            "cv_f1_mean": res["cv_scores"].mean(),
-            "val_f1": res["val_f1"],
-            **{f"test_{k}": v for k, v in metrics.items()},
-        })
-
-    best_name, best_res = get_best_model(results)
-    return rows, (best_name, best_res, X_test, y_test, scaler)
+BASE_DIR = Path(__file__).resolve().parent
 
 
 def main():
     init_mlflow()
-
-    # مرحله ۲: پاکسازی -> v2
     df_v2 = preprocess()
+    df_v3 = create_features(df_v2)
 
-    # مرحله ۳: مهندسی ویژگی -> v3
-    df_v3 = create_features()
+    candidates = {}
+    test_sets = {}
+    for version, df in [("v2", df_v2), ("v3", df_v3)]:
+        X_train, X_val, X_test, y_train, y_val, y_test = split_data(df)
+        test_sets[version] = (X_test, y_test)
+        for name, result in train_all_models(X_train, y_train, X_val, y_val, version).items():
+            candidates[version, name] = result
 
-    # مرحله ۴+۵+۶: آموزش، ارزیابی و ثبت در MLflow برای هر دو نسخه
-    all_rows, candidates = [], {}
-    for version_name, df in [("v2", df_v2), ("v3", df_v3)]:
-        rows, best_candidate = run_for_version(df, version_name)
-        all_rows.extend(rows)
-        candidates[version_name] = best_candidate
+    best_key = max(candidates, key=lambda key: candidates[key]["val_f1"])
+    best_version, best_name = best_key
+    best = candidates[best_key]
+    X_test, y_test = test_sets[best_version]
+    test = transform_features(X_test, best["scaler"], best["high_value_threshold"])
+    evaluation = evaluate_model(best["model"], test, y_test)
 
-    os.makedirs(RESULTS_DIR, exist_ok=True)
-    comparison_df = pd.DataFrame(all_rows).sort_values("test_f1_score", ascending=False)
-    comparison_df.to_csv(os.path.join(RESULTS_DIR, "model_comparison.csv"), index=False)
-    print("\n" + comparison_df.to_string(index=False))
+    results_dir = BASE_DIR / "results"
+    results_dir.mkdir(parents=True, exist_ok=True)
+    matrix_path = results_dir / "confusion_matrix.png"
+    save_confusion_matrix(evaluation["confusion_matrix"], matrix_path, f"{best_name} on {best_version}")
 
-    best_row = comparison_df.iloc[0]
-    best_version = best_row["dataset_version"]
-    _, best_res, X_test, y_test, scaler = candidates[best_version]
+    rows = []
+    experiments = []
+    for (version, name), result in candidates.items():
+        selected = (version, name) == best_key
+        bundle = {
+            key: result[key]
+            for key in ("model", "scaler", "feature_columns", "high_value_threshold")
+        }
+        bundle["dataset_version"] = version
+        metrics = {
+            "cv_f1_mean": float(result["cv_scores"].mean()),
+            "cv_f1_std": float(result["cv_scores"].std()),
+            "val_f1": float(result["val_f1"]),
+        }
+        if selected:
+            metrics.update({f"test_{key}": value for key, value in evaluation["metrics"].items()})
+        params = result["model"].get_params()
+        log_run(
+            name, version, params, metrics, SEED, bundle,
+            confusion_matrix_path=matrix_path if selected else None,
+        )
+        experiments.append({
+            "dataset_version": version,
+            "model": name,
+            "selected": selected,
+            "params": {key: str(value) for key, value in sorted(params.items())},
+            "metrics": metrics,
+        })
+        rows.append({"dataset_version": version, "model": name, "selected": selected, **metrics})
+        if selected:
+            best_bundle = bundle
+            best_info = {"model_name": name, "dataset_version": version, **metrics}
 
-    joblib.dump(
-        {"model": best_res["model"], "scaler": scaler, "feature_columns": list(X_test.columns)},
-        "models/best_model.pkl",
+    models_dir = BASE_DIR / "models"
+    models_dir.mkdir(parents=True, exist_ok=True)
+    comparison = pd.DataFrame(rows).sort_values("val_f1", ascending=False)
+    comparison.to_csv(results_dir / "model_comparison.csv", index=False)
+    joblib.dump(best_bundle, models_dir / "best_model.pkl")
+    (results_dir / "best_model_info.json").write_text(
+        json.dumps(best_info, indent=2) + "\n", encoding="utf-8",
     )
-    with open(os.path.join(RESULTS_DIR, "best_model_info.json"), "w", encoding="utf-8") as f:
-        json.dump({
-            "dataset_version": best_version,
-            "model_name": best_row["model"],
-            "test_f1_score": best_row["test_f1_score"],
-        }, f, ensure_ascii=False, indent=2)
-
-    print(f"\n✅ بهترین مدل: {best_row['model']} روی {best_version} -> models/best_model.pkl")
+    with RAW_XLSX_PATH.open("rb") as dataset:
+        dataset_hash = file_digest(dataset, "sha256").hexdigest()
+    snapshot = {
+        "seed": SEED,
+        "source_data_sha256": dataset_hash,
+        "selection_metric": "val_f1",
+        "experiments": experiments,
+    }
+    (results_dir / "experiment_summary.json").write_text(
+        json.dumps(snapshot, indent=2, allow_nan=False) + "\n", encoding="utf-8",
+    )
+    print(f"Selected {best_name} on {best_version} by validation F1")
+    print(comparison.to_string(index=False))
 
 
 if __name__ == "__main__":

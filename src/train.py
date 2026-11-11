@@ -1,29 +1,7 @@
-"""
-train.py
---------
-بازنویسی کامل نسبت به نسخه قبلی شما. تغییرات اصلی:
-
-1) قبلاً فقط train/test (80/20) داشتید و بهترین مدل را بر اساس عملکرد
-   روی همان Test انتخاب می‌کردید (اشکال روش‌شناسی: Test نباید در تصمیم‌گیری
-   دخالت کند). حالا یک تفکیک سه‌گانه داریم:
-       Train (70%) -> برای آموزش و Cross Validation
-       Validation (15%) -> فقط برای انتخاب بهترین مدل
-       Test (15%) -> فقط یک‌بار، در انتها، برای گزارش نهایی
-
-2) قبلاً فقط v3 را آموزش می‌دادید. حالا هر دو نسخه v2 و v3 به‌طور مستقل
-   آموزش/ارزیابی می‌شوند تا واقعاً ببینید مهندسی ویژگی کمک کرده یا نه.
-
-3) نرمال‌سازی (StandardScaler) اضافه شد — فقط با fit روی Train (نه کل داده)
-   تا نشتی داده در نرمال‌سازی رخ ندهد.
-
-4) class_weight/scale_pos_weight اضافه شد چون داده نامتوازن است (~27% ریزش).
-"""
-
 import numpy as np
 import pandas as pd
-from pathlib import Path
 
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
@@ -31,7 +9,8 @@ from xgboost import XGBClassifier
 from catboost import CatBoostClassifier
 from sklearn.metrics import f1_score
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+from src.features import transform_features
+
 TARGET_COLUMN = "Churn Value"
 SEED = 42
 N_FOLDS = 5
@@ -40,9 +19,9 @@ NUMERIC_COLUMNS = ["Tenure Months", "Monthly Charges", "Total Charges", "AvgChar
 
 MODEL_REGISTRY = {
     "LogisticRegression": lambda seed: LogisticRegression(max_iter=2000, random_state=seed, class_weight="balanced"),
-    "RandomForest": lambda seed: RandomForestClassifier(n_estimators=200, random_state=seed, class_weight="balanced", n_jobs=-1),
-    "XGBoost": lambda seed: XGBClassifier(n_estimators=200, eval_metric="logloss", random_state=seed, n_jobs=-1),
-    "CatBoost": lambda seed: CatBoostClassifier(iterations=200, random_state=seed, verbose=0, auto_class_weights="Balanced"),
+    "RandomForest": lambda seed: RandomForestClassifier(n_estimators=200, random_state=seed, class_weight="balanced", n_jobs=4),
+    "XGBoost": lambda seed: XGBClassifier(n_estimators=200, eval_metric="logloss", random_state=seed, n_jobs=4),
+    "CatBoost": lambda seed: CatBoostClassifier(iterations=200, random_state=seed, verbose=0, auto_class_weights="Balanced", thread_count=4, allow_writing_files=False),
 }
 
 
@@ -60,42 +39,49 @@ def split_data(df: pd.DataFrame, seed: int = SEED):
     return X_train, X_val, X_test, y_train, y_val, y_test
 
 
-def scale_numeric(X_train, X_val, X_test):
-    cols = [c for c in NUMERIC_COLUMNS if c in X_train.columns]
-    scaler = StandardScaler()
-
-    X_train, X_val, X_test = X_train.copy(), X_val.copy(), X_test.copy()
-    X_train[cols] = scaler.fit_transform(X_train[cols])   # fit فقط روی train
-    X_val[cols] = scaler.transform(X_val[cols])
-    X_test[cols] = scaler.transform(X_test[cols])
-    return X_train, X_val, X_test, scaler
+def fit_transforms(X, dataset_version):
+    threshold = float(X["Monthly Charges"].median()) if dataset_version == "v3" else None
+    columns = [column for column in NUMERIC_COLUMNS if column in X]
+    return StandardScaler().fit(X[columns]), threshold
 
 
-def train_all_models(X_train, y_train, X_val, y_val, seed: int = SEED):
-    results = {}
+def fit_model(name, builder, X, y, seed):
+    model = builder(seed)
+    if name == "XGBoost":
+        negative, positive = np.bincount(y)
+        model.set_params(scale_pos_weight=negative / positive)
+    return model.fit(X, y)
+
+
+def train_all_models(X_train, y_train, X_val, y_val, dataset_version, seed=SEED):
     skf = StratifiedKFold(n_splits=N_FOLDS, shuffle=True, random_state=seed)
-    neg, pos = np.bincount(y_train)
-    scale_pos_weight = neg / pos
+    folds = []
+    for train_idx, val_idx in skf.split(X_train, y_train):
+        fold_train, fold_val = X_train.iloc[train_idx], X_train.iloc[val_idx]
+        scaler, threshold = fit_transforms(fold_train, dataset_version)
+        folds.append((
+            transform_features(fold_train, scaler, threshold), y_train.iloc[train_idx],
+            transform_features(fold_val, scaler, threshold), y_train.iloc[val_idx],
+        ))
 
+    scaler, threshold = fit_transforms(X_train, dataset_version)
+    train = transform_features(X_train, scaler, threshold)
+    val = transform_features(X_val, scaler, threshold)
+    results = {}
     for name, builder in MODEL_REGISTRY.items():
-        model = builder(seed)
-        if name == "XGBoost":
-            model.set_params(scale_pos_weight=scale_pos_weight)
-
-        cv_scores = cross_val_score(model, X_train, y_train, cv=skf, scoring="f1",
-                                     n_jobs=-1 if name != "CatBoost" else 1)
-        print(f"[train] {name} | CV F1 (5-fold): mean={cv_scores.mean():.4f} ± {cv_scores.std():.4f}")
-
-        model.fit(X_train, y_train)
-        val_f1 = f1_score(y_val, model.predict(X_val))
-        print(f"[train] {name} | Validation F1: {val_f1:.4f}")
-
-        results[name] = {"model": model, "cv_scores": cv_scores, "val_f1": val_f1, "params": model.get_params()}
-
+        cv_scores = np.array([
+            f1_score(y_fold_val, fit_model(name, builder, X_fold, y_fold, seed).predict(X_fold_val))
+            for X_fold, y_fold, X_fold_val, y_fold_val in folds
+        ])
+        model = fit_model(name, builder, train, y_train, seed)
+        val_f1 = f1_score(y_val, model.predict(val))
+        print(f"[train] {name} | CV F1: {cv_scores.mean():.4f} ± {cv_scores.std():.4f} | Validation F1: {val_f1:.4f}")
+        results[name] = {
+            "model": model,
+            "cv_scores": cv_scores,
+            "val_f1": val_f1,
+            "scaler": scaler,
+            "high_value_threshold": threshold,
+            "feature_columns": list(train.columns),
+        }
     return results
-
-
-def get_best_model(results: dict):
-    best_name = max(results, key=lambda k: results[k]["val_f1"])
-    print(f"[train] بهترین مدل بر اساس Validation: {best_name} ({results[best_name]['val_f1']:.4f})")
-    return best_name, results[best_name]
