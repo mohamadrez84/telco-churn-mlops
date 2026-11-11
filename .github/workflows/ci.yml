@@ -34,7 +34,16 @@ jobs:
       - name: Verify HTTP contract
         run: |
           docker run -d --name telco-ci -p 127.0.0.1:8000:8000 telco-churn-api:ci
-          curl --retry 20 --retry-connrefused --retry-delay 1 --fail --silent --show-error http://127.0.0.1:8000/health
+          ready=false
+          for attempt in {1..30}; do
+            if curl --fail --silent --max-time 2 http://127.0.0.1:8000/health; then
+              ready=true
+              break
+            fi
+            test "$(docker inspect -f '{{.State.Running}}' telco-ci)" = true
+            sleep 1
+          done
+          test "$ready" = true
           curl --fail --silent --show-error -H 'Content-Type: application/json' \
             --data-binary @examples/customer.json http://127.0.0.1:8000/predict \
             | python3 -c 'import json,sys; result=json.load(sys.stdin); assert result["churn_prediction"] in (0,1) and 0 <= result["churn_probability"] <= 1'
