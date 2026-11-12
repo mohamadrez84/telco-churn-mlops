@@ -7,6 +7,7 @@ import joblib
 import pandas as pd
 from flask import Flask, jsonify, request
 
+from src.evaluate import predict_labels
 from src.features import prepare_raw_features, transform_features
 from src.preprocessing import RAW_COLUMNS
 
@@ -47,8 +48,9 @@ def predict():
         return jsonify(error=str(exc)), 400
 
     df = df[feature_columns]
-    prediction = int(model.predict(df)[0])
-    probability = float(model.predict_proba(df)[0, 1])
+    predictions, probabilities = predict_labels(model, df, bundle.get("decision_threshold"))
+    prediction = int(predictions[0])
+    probability = float(probabilities[0])
     return jsonify(
         churn_prediction=prediction,
         churn_probability=probability,

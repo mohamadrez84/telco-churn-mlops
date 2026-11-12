@@ -4,13 +4,17 @@ An end-to-end churn classification project using the IBM Telco Customer Churn sa
 
 [Model report](docs/model-report.md) · [راهنمای فارسی](docs/README.fa.md)
 
-## Results
+## Model results
 
-| Selected model | Validation F1 | Test F1 | Test precision | Test recall | Test ROC-AUC |
+| Model and decision policy | Test accuracy | Churn precision | Churn recall | Churn F1 | ROC-AUC |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| CatBoost with engineered features | 0.6435 | 0.6283 | 0.5352 | 0.7607 | 0.8531 |
+| **Selected XGBoost (v2, threshold 0.69)** | **80.23%** | **63.10%** | 61.07% | 0.6207 | **0.8598** |
+| Previous CatBoost (v3, default threshold) | 76.16% | 53.52% | **76.07%** | **0.6283** | 0.8531 |
+| Always predict no churn | 73.51% | 0.00% | 0.00% | 0.0000 | 0.5000 |
 
-The pipeline selects the model and feature set by validation F1. Only the selected model is scored on the internal test split. See the [candidate comparison](results/model_comparison.csv), [experiment snapshot](results/experiment_summary.json), and [confusion matrix](results/confusion_matrix.png). No independent cohort was available for external validation.
+The selected model improved test accuracy by 4.07 percentage points and flagged 85 fewer non-churn cases, while detecting 42 fewer churn cases. Accuracy counts all correct predictions. Churn F1 balances the precision and recall of the positive class. This trade-off favors fewer false alerts.
+
+The pipeline proposes decision thresholds from out-of-fold training scores and selects by validation accuracy, subject to an F1 floor. Only the selected candidate is scored on the internal test split in the new run. The earlier CatBoost scores are retained for comparison. No independent cohort was available for external validation. [Candidate comparison](results/model_comparison.csv) · [Search settings and metrics](results/experiment_summary.json) · [Confusion matrix](results/confusion_matrix.png)
 
 ## Run the API
 
@@ -44,7 +48,7 @@ python -m run_pipeline
 mlflow ui --backend-store-uri sqlite:///tracking/mlflow.db
 ```
 
-Each execution logs eight candidates and exports the latest metrics, parameters, dataset hash, and test confusion matrix under `results/`. The selected model bundle under `models/` includes the fitted scaler, feature order, and training-derived threshold. The [model report](docs/model-report.md#mlflow-on-another-machine) explains how to keep the complete run history and artifacts together.
+Each execution logs the selected configuration for each of the eight model and feature-set combinations and exports metrics, search settings, the dataset hash, and the test confusion matrix under `results/`. The selected model bundle under `models/` includes the fitted scaler, feature order, and decision threshold. The [model report](docs/model-report.md#mlflow-on-another-machine) explains how to keep the complete run history and artifacts together.
 
 ## Score an independent cohort
 

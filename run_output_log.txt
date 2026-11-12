@@ -89,30 +89,30 @@ None
 
 Saved to data\v3\feature_data.csv
 [train] train: (4929, 30), val: (1057, 30), test: (1057, 30)
-[train] LogisticRegression | CV F1: 0.6440 ± 0.0060 | Validation F1: 0.6202
-[train] RandomForest | CV F1: 0.6139 ± 0.0136 | Validation F1: 0.6277
-[train] XGBoost | CV F1: 0.5950 ± 0.0197 | Validation F1: 0.5771
-[train] CatBoost | CV F1: 0.6353 ± 0.0121 | Validation F1: 0.6161
+[train] LogisticRegression | 15 settings and thresholds compared on validation
+[train] RandomForest | 15 settings and thresholds compared on validation
+[train] XGBoost | 12 settings and thresholds compared on validation
+[train] CatBoost | 14 settings and thresholds compared on validation
 [train] train: (4929, 33), val: (1057, 33), test: (1057, 33)
-[train] LogisticRegression | CV F1: 0.6458 ± 0.0111 | Validation F1: 0.6310
-[train] RandomForest | CV F1: 0.6233 ± 0.0100 | Validation F1: 0.6316
-[train] XGBoost | CV F1: 0.5988 ± 0.0064 | Validation F1: 0.5912
-[train] CatBoost | CV F1: 0.6406 ± 0.0086 | Validation F1: 0.6435
-[mlflow] LogisticRegression_v2 (run_id=14d1ffcd21e74ea0874c14c596eb073c)
-[mlflow] RandomForest_v2 (run_id=67790a637bf742b3bf5658a54bef7696)
-[mlflow] XGBoost_v2 (run_id=bed754b912dd4748b1e9287e7b88e84a)
-[mlflow] CatBoost_v2 (run_id=d11520f7ba6243018cf46d064c753a8d)
-[mlflow] LogisticRegression_v3 (run_id=cfeac2017d554978b143ad417620adcf)
-[mlflow] RandomForest_v3 (run_id=91a6d7545f7a470d9e55fd12b4f2bc94)
-[mlflow] XGBoost_v3 (run_id=8829a7316e624bd5b597437a9810b6ce)
-[mlflow] CatBoost_v3 (run_id=ac66e55197a2427dbf2b5fd3746e0173)
-Selected CatBoost on v3 by validation F1
-dataset_version              model  selected  cv_f1_mean  cv_f1_std   val_f1  test_accuracy  test_precision  test_recall  test_f1_score  test_roc_auc
-             v3           CatBoost      True    0.640596   0.008569 0.643505       0.761589        0.535176     0.760714       0.628319      0.853137
-             v3       RandomForest     False    0.623340   0.009964 0.631579            NaN             NaN          NaN            NaN           NaN
-             v3 LogisticRegression     False    0.645832   0.011061 0.630970            NaN             NaN          NaN            NaN           NaN
-             v2       RandomForest     False    0.613872   0.013607 0.627713            NaN             NaN          NaN            NaN           NaN
-             v2 LogisticRegression     False    0.643987   0.005967 0.620199            NaN             NaN          NaN            NaN           NaN
-             v2           CatBoost     False    0.635306   0.012130 0.616071            NaN             NaN          NaN            NaN           NaN
-             v3            XGBoost     False    0.598757   0.006379 0.591216            NaN             NaN          NaN            NaN           NaN
-             v2            XGBoost     False    0.594966   0.019664 0.577114            NaN             NaN          NaN            NaN           NaN
+[train] LogisticRegression | 15 settings and thresholds compared on validation
+[train] RandomForest | 15 settings and thresholds compared on validation
+[train] XGBoost | 12 settings and thresholds compared on validation
+[train] CatBoost | 15 settings and thresholds compared on validation
+[mlflow] LogisticRegression_v2 (run_id=503e51b9e61d4518b3594dc82614e345)
+[mlflow] RandomForest_v2 (run_id=3e133a62ce414e4eb45a8e3e5addf74f)
+[mlflow] XGBoost_v2 (run_id=072002e60a624961ad09775a0c9ca617)
+[mlflow] CatBoost_v2 (run_id=2a9ceafebb9c4cf7b53070522f2a9314)
+[mlflow] LogisticRegression_v3 (run_id=b464c208d09d4feaa01c1b97e7a673c3)
+[mlflow] RandomForest_v3 (run_id=93dcad3e779b4eea86ea60166d4c8264)
+[mlflow] XGBoost_v3 (run_id=f8eb168fb03149708f146ef9ca7e1ab3)
+[mlflow] CatBoost_v3 (run_id=8ea32a317dac4572b092fde277c2a90e)
+Selected XGBoost on v2 by validation accuracy (F1 floor: 0.6335)
+dataset_version              model  selected  cv_f1_mean  cv_f1_std   val_f1  val_accuracy  baseline_val_f1  baseline_val_accuracy  decision_threshold  test_accuracy  test_precision  test_recall  test_f1_score  test_roc_auc
+             v2            XGBoost      True    0.631250   0.021792 0.635514      0.815516         0.577114               0.758751                0.69       0.802271        0.630996     0.610714        0.62069      0.859804
+             v3       RandomForest     False    0.636254   0.016554 0.640569      0.808893         0.630719               0.786187                0.64            NaN             NaN          NaN            NaN           NaN
+             v2           CatBoost     False    0.625942   0.013511 0.642234      0.806055         0.616071               0.755913                0.65            NaN             NaN          NaN            NaN           NaN
+             v3           CatBoost     False    0.626950   0.013688 0.636042      0.805109         0.643505               0.776727                0.66            NaN             NaN          NaN            NaN           NaN
+             v2       RandomForest     False    0.631045   0.012115 0.637631      0.803217         0.628952               0.789026                0.64            NaN             NaN          NaN            NaN           NaN
+             v3 LogisticRegression     False    0.653411   0.014527 0.652459      0.799432         0.630970               0.758751                0.61            NaN             NaN          NaN            NaN           NaN
+             v3            XGBoost     False    0.651338   0.009173 0.641509      0.784295         0.591216               0.771050                0.58            NaN             NaN          NaN            NaN           NaN
+             v2 LogisticRegression     False    0.651327   0.015652 0.639144      0.776727         0.620199               0.747398                0.56            NaN             NaN          NaN            NaN           NaN

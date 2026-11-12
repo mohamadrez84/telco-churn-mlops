@@ -1,12 +1,16 @@
 {
-  "model_name": "CatBoost",
-  "dataset_version": "v3",
-  "cv_f1_mean": 0.6405956719381475,
-  "cv_f1_std": 0.008569392825355729,
-  "val_f1": 0.6435045317220544,
-  "test_accuracy": 0.7615894039735099,
-  "test_precision": 0.535175879396985,
-  "test_recall": 0.7607142857142857,
-  "test_f1_score": 0.6283185840707964,
-  "test_roc_auc": 0.8531370656370656
+  "model_name": "XGBoost",
+  "dataset_version": "v2",
+  "cv_f1_mean": 0.6312502411986198,
+  "cv_f1_std": 0.021791917665175364,
+  "val_f1": 0.6355140186915887,
+  "val_accuracy": 0.815515610217597,
+  "baseline_val_f1": 0.5771144278606966,
+  "baseline_val_accuracy": 0.7587511825922422,
+  "decision_threshold": 0.69,
+  "test_accuracy": 0.8022705771050141,
+  "test_precision": 0.6309963099630996,
+  "test_recall": 0.6107142857142858,
+  "test_f1_score": 0.6206896551724138,
+  "test_roc_auc": 0.8598041919470492
 }

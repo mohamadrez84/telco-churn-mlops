@@ -4,9 +4,20 @@ from sklearn.metrics import (
 )
 
 
-def evaluate_model(model, X_test, y_test) -> dict:
-    y_pred = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)[:, 1] if hasattr(model, "predict_proba") else y_pred
+def predict_labels(model, features, decision_threshold=None):
+    if decision_threshold is None and not hasattr(model, "predict_proba"):
+        predictions = model.predict(features)
+        return predictions, predictions
+    probabilities = model.predict_proba(features)[:, 1]
+    if decision_threshold is None:
+        predictions = model.predict(features)
+    else:
+        predictions = (probabilities >= decision_threshold).astype(int)
+    return predictions, probabilities
+
+
+def evaluate_model(model, X_test, y_test, decision_threshold=None) -> dict:
+    y_pred, y_proba = predict_labels(model, X_test, decision_threshold)
 
     metrics = {
         "accuracy": accuracy_score(y_test, y_pred),

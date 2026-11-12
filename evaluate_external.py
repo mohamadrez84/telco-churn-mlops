@@ -34,7 +34,7 @@ def evaluate_external(cohort, reference_ids, bundle):
     if labels.isna().any() or set(labels.unique()) != {0, 1}:
         raise ValueError("Churn Value must contain both classes and only 0 or 1")
     X = prepare_raw_features(cohort[sorted(RAW_COLUMNS)], bundle)
-    result = evaluate_model(bundle["model"], X, labels.astype(int))
+    result = evaluate_model(bundle["model"], X, labels.astype(int), bundle.get("decision_threshold"))
     return {
         "model_name": type(bundle["model"]).__name__,
         "dataset_version": bundle["dataset_version"],

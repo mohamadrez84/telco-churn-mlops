@@ -2,6 +2,7 @@
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import pandas as pd
 
@@ -21,6 +22,14 @@ class PredictionTest(unittest.TestCase):
                         {**CUSTOMER, "Monthly Charges": -1}, {**CUSTOMER, "extra": 1}):
             with self.subTest(payload=payload):
                 self.assertEqual(self.client.post("/predict", json=payload).status_code, 400)
+
+    def test_prediction_uses_saved_threshold(self):
+        for threshold, expected in ((0.0, 1), (1.0, 0)):
+            with self.subTest(threshold=threshold), patch.dict(bundle, {"decision_threshold": threshold}):
+                response = self.client.post("/predict", json=CUSTOMER).get_json()
+                self.assertGreater(response["churn_probability"], 0.0)
+                self.assertLess(response["churn_probability"], 1.0)
+                self.assertEqual(response["churn_prediction"], expected)
 
     def test_raw_and_encoded_predictions_match(self):
         encoded = encode_customers(pd.DataFrame([CUSTOMER]))

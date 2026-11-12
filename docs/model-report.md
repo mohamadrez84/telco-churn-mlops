@@ -6,15 +6,17 @@ The [IBM sample](https://community.ibm.com/community/user/blogs/steven-macko/201
 
 Cleaning removes identifiers, geographic fields, and outcome-adjacent fields such as churn label, reason, score, and CLTV. The 11 missing total-charge values belong to customers with zero tenure. The same cleaning rules and categorical vocabulary are used in training and API requests. The v3 model adds a charge-to-tenure ratio, a tenure group, a long-contract flag, and a high-value flag whose threshold is learned from training data.
 
-## Model selection and internal test
+## Model tuning and internal test
 
-The stratified split uses seed 42 and allocates 4,929 records to training, 1,057 to validation, and 1,057 to testing. Numeric scaling, the high-value threshold, and XGBoost class weighting are derived from the training portion of each fold. The pipeline compares weighted logistic regression, random forest, XGBoost, and CatBoost on v2 and v3.
+The stratified split uses seed 42 and allocates 4,929 records to training, 1,057 to validation, and 1,057 to testing. Numeric scaling, the high-value threshold, and XGBoost class weighting are derived from the training portion of each fold. The pipeline compares hyperparameters for logistic regression, random forest, XGBoost, and CatBoost on v2 and v3.
 
-CatBoost v3 achieved F1 **0.6435** on validation. On the internal test split it achieved F1 **0.6283**, recall **0.7607**, precision **0.5352**, and ROC-AUC **0.8531**. It detected 213 of 280 churn cases and flagged 185 of 777 non-churn cases. See all [candidate scores](../results/model_comparison.csv) and [run parameters](../results/experiment_summary.json).
+For each configuration, candidate thresholds include 0.50, the threshold with the highest pooled out-of-fold F1, and the threshold with the highest out-of-fold accuracy within 0.015 of that F1. On validation, the pipeline maximizes accuracy among candidates within 0.01 of the strongest default model's F1. In this run the validation F1 floor was 0.6335. The selected XGBoost v2 model used threshold 0.69, achieved 81.55% validation accuracy, and had validation F1 0.6355. See the [baseline and tuned validation scores](../results/model_comparison.csv) and [search settings](../results/experiment_summary.json).
 
-![CatBoost v3 confusion matrix on the internal test split](../results/confusion_matrix.png)
+On the 1,057-record test split, the selected model achieved **80.23% accuracy**, **63.10% precision**, **61.07% recall**, **0.6207 F1**, and **0.8598 ROC-AUC**. It correctly identified 171 of 280 churn cases and flagged 100 of 777 non-churn cases. The previous CatBoost detected 213 churn cases and flagged 185 non-churn cases, with 76.16% accuracy and F1 0.6283. Predicting no churn for every case would score 73.51% accuracy and zero churn recall. The selected policy favors fewer false alerts, at the cost of missed churn cases.
 
-The test split was previously used by an earlier pipeline version. These results describe the IBM sample. An independent cohort is still needed to establish performance on separately collected data. The default classification threshold has no retention-cost optimization, and the reported probability has no separate calibration analysis.
+![XGBoost v2 confusion matrix on the internal test split](../results/confusion_matrix.png)
+
+The test split was previously used by an earlier pipeline version. These results describe the IBM sample. An independent cohort is still needed to establish performance on separately collected data. The decision threshold has no retention-cost optimization and the probability has no separate calibration analysis.
 
 ## Deployment and verification
 
